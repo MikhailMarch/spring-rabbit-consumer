@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mikhail.consumer.dto.UserDto;
 import com.mikhail.consumer.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class QueueConsumer {
@@ -17,7 +19,8 @@ public class QueueConsumer {
 
     @RabbitListener(queues = "user")
     public void consumeRecord(String record) throws JsonProcessingException {
-        var user = objectMapper.readValue(record, UserDto.class);
+        log.info("recieved record {}", record);
+        var user = objectMapper.convertValue(record, UserDto.class);
 
         switch (user.getType()) {
             case SELLER -> userService.saveSeller(user.getName());
